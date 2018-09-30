@@ -48,6 +48,10 @@ WORKDIR /project/sawtooth-core
 
 CMD echo "\033[0;32m--- Building intkey-tp-python ---\n\033[0m" \
  && bin/protogen \
+ && cd cli \
+ && python3 setup.py clean --all \
+ && python3 setup.py build \
  && cd sdk/examples/intkey_python \
  && python3 setup.py clean --all \
  && python3 setup.py build
+

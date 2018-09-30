@@ -44,7 +44,9 @@ setup(
         "cbor",
         "colorlog",
         "sawtooth-sdk",
+        "sawtooth-cli",
         "sawtooth-signing",
+        'aiohttp>=2.3.2',
     ],
     data_files=data_files,
     entry_points={

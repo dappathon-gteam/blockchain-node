@@ -1,6 +1,38 @@
 
 ![Hyperledger Sawtooth](images/sawtooth_logo_light_blue-small.png)
 
+TRUST WILL blockchain Guide
+============
+
+This demo leverage Hyperledger Sawtooth and Intkey Transaction Processor in order to build a custom Processor to suitable with Last will business
+
+See detail of Processor handler (similar to Smart contract) at
+
+*sdk/examples/intkey_python/sawtooth_intkey/processor/handler.py*
+
+Please follow Sawtooth steps to setup environment
+[BUILD.md](BUILD.md)
+
+Step 1: Build
+------------
+Move to project folder
+
+`$ cd sawtooth-node`
+
+Build docker container
+
+`$ docker-compose build`
+
+Step 2: Start a node
+------------
+
+`$ docker-compose up -d`
+
+List API support by this node could be see at function *start_rest_api* in path:
+
+sdk/examples/intkey_python/sawtooth_intkey/client_cli/intkey_cli.py
+
+
 Hyperledger Sawtooth
 -------------
 

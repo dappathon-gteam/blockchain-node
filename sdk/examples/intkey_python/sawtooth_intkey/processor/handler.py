@@ -27,7 +27,7 @@ from sawtooth_sdk.processor.exceptions import InternalError
 LOGGER = logging.getLogger(__name__)
 
 
-VALID_VERBS = 'set', 'inc', 'dec'
+VALID_VERBS = 'set', 'inc', 'dec', 'mul'
 
 MIN_VALUE = 0
 MAX_VALUE = 4294967295
@@ -63,7 +63,6 @@ class IntkeyTransactionHandler(TransactionHandler):
         state = _get_state_data(name, context)
 
         updated_state = _do_intkey(verb, name, value, state)
-
         _set_state_data(name, updated_state, context)
 
 
@@ -103,23 +102,25 @@ def _decode_transaction(transaction):
 
 def _validate_verb(verb):
     if verb not in VALID_VERBS:
-        raise InvalidTransaction('Verb must be "set", "inc", or "dec"')
+        raise InvalidTransaction('Verb must be "set", "inc", "dec", or "mul"')
 
 
 def _validate_name(name):
-    if not isinstance(name, str) or len(name) > MAX_NAME_LENGTH:
-        raise InvalidTransaction(
-            'Name must be a string of no more than {} characters'.format(
-                MAX_NAME_LENGTH))
+    # if not isinstance(name, str) or len(name) > MAX_NAME_LENGTH:
+    #     raise InvalidTransaction(
+    #         'Name must be a string of no more than {} characters'.format(
+    #             MAX_NAME_LENGTH))
+    pass
 
 
 def _validate_value(value):
-    if not isinstance(value, int) or value < 0 or value > MAX_VALUE:
-        raise InvalidTransaction(
-            'Value must be an integer '
-            'no less than {i} and no greater than {a}'.format(
-                i=MIN_VALUE,
-                a=MAX_VALUE))
+    # if not isinstance(value, int) or value < 0 or value > MAX_VALUE:
+    #     raise InvalidTransaction(
+    #         'Value must be an integer '
+    #         'no less than {i} and no greater than {a}'.format(
+    #             i=MIN_VALUE,
+    #             a=MAX_VALUE))
+    pass
 
 
 def _get_state_data(name, context):
@@ -151,6 +152,7 @@ def _do_intkey(verb, name, value, state):
         'set': _do_set,
         'inc': _do_inc,
         'dec': _do_dec,
+        'mul': _do_mul,
     }
 
     try:
@@ -164,11 +166,11 @@ def _do_set(name, value, state):
     msg = 'Setting "{n}" to {v}'.format(n=name, v=value)
     LOGGER.debug(msg)
 
-    if name in state:
-        raise InvalidTransaction(
-            'Verb is "set", but already exists: Name: {n}, Value {v}'.format(
-                n=name,
-                v=state[name]))
+    # if name in state:
+    #     raise InvalidTransaction(
+    #         'Verb is "set", but already exists: Name: {n}, Value {v}'.format(
+    #             n=name,
+    #             v=state[name]))
 
     updated = {k: v for k, v in state.items()}
     updated[name] = value
@@ -208,6 +210,28 @@ def _do_dec(name, value, state):
 
     curr = state[name]
     decd = curr - value
+
+    if decd < MIN_VALUE:
+        raise InvalidTransaction(
+            'Verb is "dec", but result would be less than {}'.format(
+                MIN_VALUE))
+
+    updated = {k: v for k, v in state.items()}
+    updated[name] = decd
+
+    return updated
+
+
+def _do_mul(name, value, state):
+    msg = 'Multiplying "{n}" by {v}'.format(n=name, v=value)
+    LOGGER.debug(msg)
+
+    if name not in state:
+        raise InvalidTransaction(
+            'Verb is "dec" but name "{}" not in state'.format(name))
+
+    curr = state[name]
+    decd = curr * value
 
     if decd < MIN_VALUE:
         raise InvalidTransaction(

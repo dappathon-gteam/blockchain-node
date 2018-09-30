@@ -51,7 +51,7 @@ services:
     image: intkey-tp-python-local:${ISOLATION_ID}
     volumes:
       - ./:/project/sawtooth-core
-    container_name: intkey-tp-python-local
+    container_name: intkey-tp
     depends_on:
       - validator
     command: |
@@ -64,32 +64,6 @@ services:
       "
     stop_signal: SIGKILL
 
-
-  xo-tp-python:
-    build:
-      context: .
-      dockerfile: sdk/examples/xo_python/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    image: xo-tp-python-local:${ISOLATION_ID}
-    volumes:
-      - ./:/project/sawtooth-core
-    container_name: xo-tp-python-local
-    depends_on:
-      - validator
-    command: |
-      bash -c "
-        bin/protogen
-        cd sdk/examples/xo_python
-        python3 setup.py clean --all
-        python3 setup.py build
-        xo-tp-python -vv -C tcp://validator:4004
-      "
-    stop_signal: SIGKILL
-
-
   client:
     build:
       context: .
@@ -101,13 +75,15 @@ services:
     image: sawtooth-shell-local:${ISOLATION_ID}
     volumes:
       - ./:/project/sawtooth-core
-    container_name: sawtooth-shell-local
+    container_name: shell
     depends_on:
       - validator
+    ports:
+      - "8888:8888"
     command: |
       bash -c "
         sawtooth keygen &&
-        tail -f /dev/null
+        intkey start
       "
     stop_signal: SIGKILL
 
@@ -139,7 +115,6 @@ services:
         python3 setup.py build
         mkdir -p bin
         mkdir -p lib
-        cargo build --release
         cp ./target/release/sawtooth-validator bin/sawtooth-validator
         cp ./target/release/libsawtooth_validator.so lib/libsawtooth_validator.so
         sawadm keygen
@@ -194,12 +169,32 @@ services:
     container_name: sawtooth-devmode-rust-local
     depends_on:
       - validator
+    #        cargo build --release
     command: |
       bash -c "
         cd sdk/examples/devmode_rust
-        cargo build --release
         mkdir -p bin
         cp ./target/release/devmode-rust bin/devmode-rust
         devmode-rust -v --connect tcp://validator:5050
       "
     stop_signal: SIGKILL
+
+#  smallbank-rust-tp:
+#    build:
+#      context: ./
+#      dockerfile: ./families/smallbank/smallbank_rust/Dockerfile
+#      args:
+#        - http_proxy
+#        - https_proxy
+#        - no_proxy
+#    depends_on:
+#      - validator
+#    image: smallbank-rust-tp-local:${ISOLATION_ID}
+#    container_name: sawtooth-smallbank-tp-rust-default
+#    volumes:
+#      - ./:/project/sawtooth-core
+#    command: |
+#      bash -c "
+#        smallbank-tp-rust -vv -C tcp://validator:4004
+#      "
+

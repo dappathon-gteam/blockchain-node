@@ -20,3 +20,6 @@ class IntKeyCliException(Exception):
 
 class IntkeyClientException(Exception):
     pass
+
+class IntkeyKeyNotFoundException(IntkeyClientException):
+    pass

@@ -119,3 +119,5 @@ def do_keygen(args):
 
     except IOError as ioe:
         raise CliException('IOError: {}'.format(str(ioe)))
+
+    return private_key, public_key

@@ -33,7 +33,10 @@ from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader
 from sawtooth_sdk.protobuf.batch_pb2 import Batch
 
 from sawtooth_intkey.client_cli.exceptions import IntkeyClientException
+from sawtooth_intkey.client_cli.exceptions import IntkeyKeyNotFoundException
 
+import logging
+LOGGER = logging.getLogger(__name__)
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
@@ -60,6 +63,7 @@ class IntkeyClient:
 
             self._signer = CryptoFactory(
                 create_context('secp256k1')).new_signer(private_key)
+            print(self._signer)
 
     def set(self, name, value, wait=None):
         return self._send_transaction('set', name, value, wait=wait)
@@ -69,6 +73,9 @@ class IntkeyClient:
 
     def dec(self, name, value, wait=None):
         return self._send_transaction('dec', name, value, wait=wait)
+
+    def mul(self, name, value, wait=None):
+        return self._send_transaction('mul', name, value, wait=wait)
 
     def list(self):
         result = self._send_request(
@@ -133,7 +140,7 @@ class IntkeyClient:
                 result = requests.get(url, headers=headers)
 
             if result.status_code == 404:
-                raise IntkeyClientException("No such key: {}".format(name))
+                raise IntkeyKeyNotFoundException("No such key: {}".format(name))
 
             elif not result.ok:
                 raise IntkeyClientException("Error {}: {}".format(
