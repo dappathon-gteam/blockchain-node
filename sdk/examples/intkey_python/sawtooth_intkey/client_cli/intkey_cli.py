@@ -929,9 +929,7 @@ def _wrap_response(request, data=None, metadata=None, status=200):
         content_type='application/json',
         headers={
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': '*'
-
-        },
+            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'},
         text=json.dumps(
             envelope,
             indent=2,
